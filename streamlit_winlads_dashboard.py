@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from pymongo import MongoClient
+import pymongo
 import pprint
 from datetime import datetime
 
@@ -9,7 +9,7 @@ from datetime import datetime
 # Test connection to database
 try: 
        
-    client = MongoClient(st.secrets["connection_url"])        
+    client = pymongo.MongoClient(st.secrets["connection_url"])        
     client.admin.command('ping')
     print("Database connection established...")
 except Exception as e:
@@ -17,11 +17,20 @@ except Exception as e:
 
 # Connect to collection in database
 
+# Uses st.cache_resource to only run once.
+
 database_name = "curated_data"
 import_collection_name = "stripe1_charges_selected"
 
-db = client[database_name]
-collection = db[import_collection_name]
+@st.cache_resource
+
+# Uses st.cache_data to only rerun when the query changes or after 10 min.
+
+@st.cache_data(ttl=600)
+
+db = client.[database_name]
+collection = db.[import_collection_name]
+
 
 # Extract all data from collection 
 
