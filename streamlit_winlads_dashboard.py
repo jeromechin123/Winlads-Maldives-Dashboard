@@ -17,13 +17,11 @@ except Exception as e:
 
 # Connect to collection in database
 
+database_name = "curated_data"
+import_collection_name = "stripe1_charges_selected"
 
 db = client[database_name]
 collection = db[import_collection_name]
-
-db = client.database_name
-collection = db.import_collection_name
-
 
 # Extract all data from collection 
 
