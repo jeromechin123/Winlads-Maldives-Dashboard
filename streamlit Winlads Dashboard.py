@@ -1,23 +1,14 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import os
 from pymongo import MongoClient
-from dotenv import load_dotenv
 import pprint
 from datetime import datetime
 
 
-# Load environment variables from the .env file
-load_dotenv()
- 
-# Access environment variables
-connection_url = os.getenv("connection_url")
-
 # Test connection to database
-try: 
-       
-    client = MongoClient(connection_url)        
+try:     
+    client = MongoClient(st.secrets["connection_url"])     
     client.admin.command('ping')
     print("Database connection established...")
 except Exception as e:
