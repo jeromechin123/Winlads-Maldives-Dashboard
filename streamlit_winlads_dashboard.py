@@ -17,16 +17,9 @@ except Exception as e:
 
 # Connect to collection in database
 
-# Uses st.cache_resource to only run once.
 
-database_name = "curated_data"
-import_collection_name = "stripe1_charges_selected"
-
-@st.cache_resource
-
-# Uses st.cache_data to only rerun when the query changes or after 10 min.
-
-@st.cache_data(ttl=600)
+db = client[database_name]
+collection = db[import_collection_name]
 
 db = client.database_name
 collection = db.import_collection_name
@@ -67,8 +60,8 @@ charges1_flatten_data['name'] = charges1_flatten_data['name'].str.title()
 database_name = "curated_data"
 import_collection_name = "stripe2_charges_selected"
 
-db = client.database_name
-collection = db.import_collection_name
+db = client[database_name]
+collection = db[import_collection_name]
 
 # Extract all data from collection 
 
