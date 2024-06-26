@@ -127,7 +127,8 @@ charges1_flatten_data['created'] = pd.to_datetime(charges1_flatten_data['created
 
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
-charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= cutoff_datetime) &
+charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= campaign_period[0]) &
+                                                   (charges1_flatten_data['created'] <= campaign_period[1]) &
                                                    (charges1_flatten_data['paid'] == True) &
                                                    (charges1_flatten_data['description'] == 'Winlads Pty Ltd') &
                                                    (~charges1_flatten_data['name'].isin(exclude_name_list))
@@ -154,11 +155,11 @@ charges2_flatten_data['created'] = pd.to_datetime(charges2_flatten_data['created
 
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
-charges2_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= cutoff_datetime) &
-                                          (charges1_flatten_data['paid'] == True) &
-                                          (~charges1_flatten_data['name'].isin(exclude_name_list))
-                                          ]
-
+charges2_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= campaign_period[0]) &
+                                                   (charges1_flatten_data['created'] <= campaign_period[1]) &
+                                                   (charges1_flatten_data['paid'] == True) &
+                                                   (~charges1_flatten_data['name'].isin(exclude_name_list))
+                                                  ]
 
 col1, col2 =st.columns(2, gap="small", vertical_alignment="top")
 
