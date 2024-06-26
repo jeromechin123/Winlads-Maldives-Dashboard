@@ -28,8 +28,8 @@ import_collection_name = "stripe1_charges_selected"
 
 @st.cache_data(ttl=600)
 
-db = client.[database_name]
-collection = db.[import_collection_name]
+db = client.database_name
+collection = db.import_collection_name
 
 
 # Extract all data from collection 
@@ -67,8 +67,8 @@ charges1_flatten_data['name'] = charges1_flatten_data['name'].str.title()
 database_name = "curated_data"
 import_collection_name = "stripe2_charges_selected"
 
-db = client[database_name]
-collection = db[import_collection_name]
+db = client.database_name
+collection = db.import_collection_name
 
 # Extract all data from collection 
 
