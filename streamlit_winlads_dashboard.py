@@ -105,15 +105,20 @@ charges2_flatten_data['name'] = charges2_flatten_data['name'].str.title()
 st.title('Winlads Maldives Campaign')
 
 # Select owners name from exclude list
-exclude_name_list = st.multiselect('Exclude Names', charges1_flatten_data['name'].unique())
+unique_names = set(charges1_flatten_data['name'].unique()) | set(charges2_flatten_data['name'].unique())
+exclude_name_list = st.multiselect('Exclude Names', unique_names)
 
 # Ask for variable inputs for campaign spending
 campaign_cost = st.number_input('Campaign Cost', min_value=0.0,value=10000.0)
 ad_spend = st.number_input('Ad spend', min_value=0.0,value=5000.0)
 
-# Get campaign start date
-cutoffdate = st.date_input('Campaign Start Date', format = "DD/MM/YYYY")
-cutoff_datetime = pd.to_datetime(cutoffdate)
+# Get campaign start date and end date
+campaign_period = st.slider(
+    "Campaign Period",
+    value = (datetime(2024, 6, 9), datetime.now()),
+    min_value = datetime(2024, 1, 1),
+    max_value = datetime(2025, 1, 1)
+    )
 
 st.divider()
 
