@@ -200,7 +200,7 @@ with col2:
 
 
 
-if st.checkbox('Show Stripe Finance data'):
+if st.checkbox('Show Stripe finance table'):
     st.subheader('Finance data')
     st.write(charges2_active_purchasers)
 
