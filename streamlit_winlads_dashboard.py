@@ -17,8 +17,13 @@ except Exception as e:
 
 # Connect to collection in database
 
+
 database_name = "curated_data"
 import_collection_name = "stripe1_charges_selected"
+
+
+# Uses st.cache_data to only rerun when the query changes or after 10 min.
+
 
 db = client[database_name]
 collection = db[import_collection_name]
@@ -103,24 +108,45 @@ charges2_flatten_data['name'] = charges2_flatten_data['name'].str.title()
 
 
 st.title('Winlads Maldives Campaign')
+st.divider()
 
-# Select owners name from exclude list
-unique_names = set(charges1_flatten_data['name'].unique()) | set(charges2_flatten_data['name'].unique())
-exclude_name_list = st.multiselect('Exclude Names', unique_names)
+# create a sidebar for the inputs
+
+st.sidebar.title('Campaign Details')
+
+st.sidebar.divider()
+
+
 
 # Ask for variable inputs for campaign spending
-campaign_cost = st.number_input('Campaign Cost', min_value=0.0,value=10000.0)
-ad_spend = st.number_input('Ad spend', min_value=0.0,value=5000.0)
+campaign_cost = st.sidebar.number_input('Campaign Cost', min_value=0.0,value=10000.0)
+ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=5000.0)
 
 # Get campaign start date and end date
-campaign_period = st.slider(
+
+campaign_period = st.sidebar.slider(
     "Campaign Period",
     value = (datetime(2024, 6, 9), datetime.now()),
     min_value = datetime(2024, 1, 1),
     max_value = datetime(2025, 1, 1)
     )
 
-st.divider()
+# # Select owners name from exclude list
+
+# unique_names = set(charges1_flatten_data['name'].unique()) | set(charges2_flatten_data['name'].unique())
+# exclude_name_list = st.sidebar.multiselect('Exclude Names', unique_names)
+# st.write(exclude_name_list)
+
+exclude_name_list = []
+
+if st.sidebar.checkbox('Remove admin transactions'):
+    st.sidebar.write('Admin transactions removed')
+    exclude_name_list = ["Shehan Tenabadu","Shehan Thenabadu","Shehan Thenabadu`","Shehan P Thenabdu","Shehan P Thenabadu",
+                          "S", "Shehsn P Thenabadu", "Winlads Pty Ltt","Winlads Pty Ltd"]
+else:
+    exclude_name_list = []
+
+
 
 # Convert created date to datetime
 charges1_flatten_data['created'] = pd.to_datetime(charges1_flatten_data['created'])
@@ -138,14 +164,14 @@ col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
 
 with col_1:
     st.subheader('Stripe Admin@ One-offs')
-    st.write(charges1_active_purchasers['id'].count())
+    st.header(f":orange[{charges1_active_purchasers['id'].count()}]")
 
 with col_2:
     st.subheader('Stripe Admin Revenue@ One-offs')
-    st.write("$"+"{:.2f}".format(charges1_active_purchasers['amount'].sum()))
+    st.header(f":orange[${charges1_active_purchasers['amount'].sum():.2f}]")
 
-if st.checkbox('Show Admin raw data'):
-    st.subheader('Raw data')
+if st.checkbox('Show Stripe admin table'):
+    st.subheader('Admin Data')
     st.write(charges1_active_purchasers)
 
 st.divider()
@@ -155,41 +181,41 @@ charges2_flatten_data['created'] = pd.to_datetime(charges2_flatten_data['created
 
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
-charges2_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= campaign_period[0]) &
-                                                   (charges1_flatten_data['created'] <= campaign_period[1]) &
-                                                   (charges1_flatten_data['paid'] == True) &
-                                                   (~charges1_flatten_data['name'].isin(exclude_name_list))
+charges2_active_purchasers = charges2_flatten_data[(charges2_flatten_data['created'] >= campaign_period[0]) &
+                                                   (charges2_flatten_data['created'] <= campaign_period[1]) &
+                                                   (charges2_flatten_data['paid'] == True) &
+                                                   (~charges2_flatten_data['name'].isin(exclude_name_list))
                                                   ]
+
 
 col1, col2 =st.columns(2, gap="small", vertical_alignment="top")
 
 with col1: 
     st.subheader('Stripe Finance@ One-offs')
-    st.write(charges2_active_purchasers['id'].count())
+    st.header(f":orange[{charges2_active_purchasers['id'].count()}]")
 
 with col2:
     st.subheader('Stripe Finance Revenue@ One-offs')
-    st.write("$"+"{:.2f}".format(charges2_active_purchasers['amount'].sum()))
+    st.header(f":orange[${charges2_active_purchasers['amount'].sum():.2f}]")
 
 
 
-if st.checkbox('Show Finance raw data'):
-    st.subheader('Raw data')
+if st.checkbox('Show Stripe Finance data'):
+    st.subheader('Finance data')
     st.write(charges2_active_purchasers)
 
 st.divider()
 
 st.subheader('Total Revenue')
-st.write("$"+"{:.2f}".format(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum()))
+st.header(f":orange[${charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum():.2f}]")
 
-st.subheader('Total Revenue less campaign cost')
-st.write("$"+"{:.2f}".format(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - campaign_cost))
+st.subheader('Total Revenue less Ad Spend  ')
+st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - ad_spend):.2f}]")
 
-st.subheader('Total Revenue less campaign cost and ad spend')
-st.write("$"+"{:.2f}".format(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - campaign_cost - ad_spend))
+st.subheader('Total Revenue Less Campaign cost and Ad Spend')
+st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - campaign_cost - ad_spend):.2f}]")
 
-st.subheader('Return on ad spend')
-st.write("$"+"{:.2f}".format((charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum())/ad_spend))
-
+st.subheader('Profit/Loss per $1 Ad Spent')
+st.header(f":orange[${(((charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum())/ad_spend)-1):.2f}]")
 
 
