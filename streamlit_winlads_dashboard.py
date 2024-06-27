@@ -209,11 +209,17 @@ st.divider()
 st.subheader('Total Revenue')
 st.header(f":orange[${charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum():.2f}]")
 
+st.divider()
+
 st.subheader('Total Revenue less Ad Spend  ')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - ad_spend):.2f}]")
 
+st.divider()
+
 st.subheader('Total Revenue Less Campaign cost and Ad Spend')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - campaign_cost - ad_spend):.2f}]")
+
+st.divider()
 
 st.subheader('Profit/Loss per $1 Ad Spent')
 st.header(f":orange[${(((charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum())/ad_spend)-1):.2f}]")
