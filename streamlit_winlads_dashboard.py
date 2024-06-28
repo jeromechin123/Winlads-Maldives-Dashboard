@@ -120,7 +120,7 @@ st.sidebar.divider()
 
 # Ask for variable inputs for campaign spending
 campaign_cost = st.sidebar.number_input('Campaign Cost', min_value=0.0,value=10000.0)
-ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=5000.0)
+ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=2900.0)
 
 # Get campaign start date and end date
 
