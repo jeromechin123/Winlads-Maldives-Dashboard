@@ -4,6 +4,7 @@ import numpy as np
 import pymongo
 import pprint
 from datetime import datetime
+from datetime import timedelta
 
 
 # Test connection to database
@@ -24,13 +25,15 @@ import_collection_name = "stripe1_charges_selected"
 
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 
-
-db = client[database_name]
-collection = db[import_collection_name]
+@st.cache_data(ttl=600)
+def get_data(database_name, import_collection_name):
+    db = client[database_name]
+    collection = db[import_collection_name]
+    return list(collection.find())
 
 # Extract all data from collection 
 
-chrarges1_data = list(collection.find())    
+chrarges1_data = get_data(database_name, import_collection_name) 
 
 # Flatten data to get json fields in individual columns -- Use '_' as seperator
 
@@ -51,7 +54,9 @@ charges1_flatten_data[["amount","amount_captured"]] = charges1_flatten_data[["am
 
 # Reformat date from UNIX epoch to datetime
 
-charges1_flatten_data['created'] = charges1_flatten_data['created'].apply(lambda x: datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
+# charges1_flatten_data['created'] = charges1_flatten_data['created'].apply(lambda x: datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
+charges1_flatten_data['created'] = charges1_flatten_data['created'].apply(lambda x: datetime.utcfromtimestamp(x))
+charges1_flatten_data['created'] = (charges1_flatten_data['created']) + timedelta(hours=10)
 
 # Clean name and emails to remove inconsistencies
 
@@ -63,12 +68,10 @@ charges1_flatten_data['name'] = charges1_flatten_data['name'].str.title()
 database_name = "curated_data"
 import_collection_name = "stripe2_charges_selected"
 
-db = client[database_name]
-collection = db[import_collection_name]
+# Extract all data from 2nd collection 
 
-# Extract all data from collection 
+stripe2_charges_data = get_data(database_name, import_collection_name)
 
-stripe2_charges_data = list(collection.find())    
 
 # Flatten data to get json fields in individual columns -- Use '_' as seperator
 
@@ -92,8 +95,8 @@ charges2_flatten_data[["amount","amount_captured"]] = charges2_flatten_data[["am
 
 # Reformat date from UNIX epoch to datetime
 
-charges2_flatten_data['created'] = charges2_flatten_data['created'].apply(lambda x: datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
-
+charges2_flatten_data['created'] = charges2_flatten_data['created'].apply(lambda x: datetime.utcfromtimestamp(x))
+charges2_flatten_data['created'] = (charges2_flatten_data['created']) + timedelta(hours=10)
 
 # Clean name and emails to remove inconsistencies
 
@@ -120,7 +123,7 @@ st.sidebar.divider()
 
 # Ask for variable inputs for campaign spending
 campaign_cost = st.sidebar.number_input('Campaign Cost', min_value=0.0,value=10000.0)
-ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=2900.0)
+ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=5000.0)
 
 # Get campaign start date and end date
 
@@ -161,6 +164,7 @@ charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['creat
                                                   ]
 
 col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
+
 
 with col_1:
     st.subheader('Stripe Admin@ One-offs')
@@ -209,19 +213,20 @@ st.divider()
 st.subheader('Total Revenue')
 st.header(f":orange[${charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum():.2f}]")
 
+# st.write("")
 st.divider()
+
 
 st.subheader('Total Revenue less Ad Spend  ')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - ad_spend):.2f}]")
-
 st.divider()
 
 st.subheader('Total Revenue Less Campaign cost and Ad Spend')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - campaign_cost - ad_spend):.2f}]")
-
 st.divider()
 
 st.subheader('Profit/Loss per $1 Ad Spent')
 st.header(f":orange[${(((charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum())/ad_spend)-1):.2f}]")
 
 
+st.button("Rerun")
