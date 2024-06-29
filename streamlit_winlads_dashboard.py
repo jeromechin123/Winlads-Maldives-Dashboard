@@ -51,7 +51,7 @@ charges1_flatten_data[["amount","amount_captured"]] = charges1_flatten_data[["am
 
 # Reformat date from UNIX epoch to datetime
 
-charges1_flatten_data['created'] = charges1_flatten_data['created'].apply(lambda x: datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
+charges1_flatten_data['created'] = charges1_flatten_data['created'].apply(lambda x: (datetime.utcfromtimestamp(x) + timedelta(hours=10)).strftime('%Y-%m-%d %H:%M:%S'))
 
 # Clean name and emails to remove inconsistencies
 
@@ -92,7 +92,7 @@ charges2_flatten_data[["amount","amount_captured"]] = charges2_flatten_data[["am
 
 # Reformat date from UNIX epoch to datetime
 
-charges2_flatten_data['created'] = charges2_flatten_data['created'].apply(lambda x: datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
+charges2_flatten_data['created'] = charges2_flatten_data['created'].apply(lambda x: (datetime.utcfromtimestamp(x) + timedelta(hours=10)).strftime('%Y-%m-%d %H:%M:%S'))
 
 
 # Clean name and emails to remove inconsistencies
