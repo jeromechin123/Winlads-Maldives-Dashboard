@@ -159,7 +159,7 @@ charges1_flatten_data['created'] = pd.to_datetime(charges1_flatten_data['created
 charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= campaign_period[0]) &
                                                    (charges1_flatten_data['created'] <= campaign_period[1]) &
                                                    (charges1_flatten_data['paid'] == True) &
-                                                   (charges1_flatten_data['description'] == 'Winlads Pty Ltd') &
+                                                   (~charges1_flatten_data['description'].str.contains('Subscription', na=False)) &
                                                    (~charges1_flatten_data['name'].isin(exclude_name_list))
                                                   ]
 
