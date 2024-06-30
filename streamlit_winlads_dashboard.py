@@ -156,7 +156,6 @@ charges1_flatten_data['created'] = pd.to_datetime(charges1_flatten_data['created
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
 charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= datetime(2024, 6, 9)) &
-                                                   (charges1_flatten_data['created'] <= datetime(2024, 6, 30, 18, 30, 0)) &
                                                    (charges1_flatten_data['paid'] == True) &
                                                    (~charges1_flatten_data['description'].str.contains('Subscription', na=False)) &
                                                    (~charges1_flatten_data['name'].isin(exclude_name_list))
@@ -185,7 +184,6 @@ charges2_flatten_data['created'] = pd.to_datetime(charges2_flatten_data['created
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
 charges2_active_purchasers = charges2_flatten_data[(charges2_flatten_data['created'] >= datetime(2024, 6, 9)) &
-                                                   (charges2_flatten_data['created'] <= datetime(2024, 6, 30, 18, 30, 0)) &
                                                    (charges2_flatten_data['paid'] == True) &
                                                    (~charges2_flatten_data['name'].isin(exclude_name_list))
                                                   ]
