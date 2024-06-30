@@ -28,7 +28,7 @@ import_collection_name = "stripe1_charges_selected"
 if 'key' not in st.session_state:
     st.session_state['rerun_counter'] = 0
 
-@st.cache(ttl=300) 
+@st.cache_data(ttl=300) 
 
 def get_data(database_name, import_collection_name, rerun_counter):
     db = client[database_name]
