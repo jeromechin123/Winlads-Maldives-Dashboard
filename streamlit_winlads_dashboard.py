@@ -122,16 +122,16 @@ st.sidebar.divider()
 
 # Ask for variable inputs for campaign spending
 campaign_cost = st.sidebar.number_input('Campaign Cost', min_value=0.0,value=10000.0)
-ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=3000.0)
+ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=5000.0)
 
 # Get campaign start date and end date
 
-campaign_period = st.sidebar.slider(
-    "Campaign Period",
-    value = (datetime(2024, 6, 9), datetime.now()),
-    min_value = datetime(2024, 1, 1),
-    max_value = datetime(2025, 1, 1)
-    )
+# campaign_period = st.sidebar.slider(
+#     "Campaign Period",
+#     value = (datetime(2024, 6, 9), datetime.now()),
+#     min_value = datetime(2024, 1, 1),
+#     max_value = datetime(2025, 1, 1)
+#     )
 
 # # Select owners name from exclude list
 
@@ -155,8 +155,8 @@ charges1_flatten_data['created'] = pd.to_datetime(charges1_flatten_data['created
 
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
-charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= campaign_period[0]) &
-                                                   (charges1_flatten_data['created'] <= campaign_period[1]) &
+charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >= datetime(2024, 6, 9)) &
+                                                   (charges1_flatten_data['created'] <= datetime(2024, 6, 30, 18, 30, 0)) &
                                                    (charges1_flatten_data['paid'] == True) &
                                                    (~charges1_flatten_data['description'].str.contains('Subscription', na=False)) &
                                                    (~charges1_flatten_data['name'].isin(exclude_name_list))
@@ -184,8 +184,8 @@ charges2_flatten_data['created'] = pd.to_datetime(charges2_flatten_data['created
 
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
-charges2_active_purchasers = charges2_flatten_data[(charges2_flatten_data['created'] >= campaign_period[0]) &
-                                                   (charges2_flatten_data['created'] <= campaign_period[1]) &
+charges2_active_purchasers = charges2_flatten_data[(charges2_flatten_data['created'] >= datetime(2024, 6, 9)) &
+                                                   (charges2_flatten_data['created'] <= datetime(2024, 6, 30, 18, 30, 0)) &
                                                    (charges2_flatten_data['paid'] == True) &
                                                    (~charges2_flatten_data['name'].isin(exclude_name_list))
                                                   ]
@@ -209,22 +209,22 @@ if st.checkbox('Show Stripe finance table'):
 
 st.divider()
 
-st.subheader('Once off Campaign Revenue')
+st.subheader('Total Revenue')
 st.header(f":orange[${charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum():.2f}]")
 
 # st.write("")
 st.divider()
 
 
-st.subheader('Campaign Revenue less Ad Spend  ')
+st.subheader('Total Revenue less Ad Spend  ')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - ad_spend):.2f}]")
 st.divider()
 
-st.subheader('Campaign Revenue Less Campaign cost and Ad Spend')
+st.subheader('Total Revenue Less Campaign cost and Ad Spend')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - campaign_cost - ad_spend):.2f}]")
 st.divider()
 
-st.subheader('Campaign Profit/Loss per $1 Ad Spent')
+st.subheader('Profit/Loss per $1 Ad Spent')
 st.header(f":orange[${(((charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum())/ad_spend)-1):.2f}]")
 
 
