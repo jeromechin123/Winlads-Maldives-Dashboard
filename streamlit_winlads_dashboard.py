@@ -25,7 +25,6 @@ import_collection_name = "stripe1_charges_selected"
 
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 
-@st.cache_data(ttl=600)
 def get_data(database_name, import_collection_name):
     db = client[database_name]
     collection = db[import_collection_name]
@@ -210,22 +209,22 @@ if st.checkbox('Show Stripe finance table'):
 
 st.divider()
 
-st.subheader('Total Revenue')
+st.subheader('Once off Campaign Revenue')
 st.header(f":orange[${charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum():.2f}]")
 
 # st.write("")
 st.divider()
 
 
-st.subheader('Total Revenue less Ad Spend  ')
+st.subheader('Campaign Revenue less Ad Spend  ')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - ad_spend):.2f}]")
 st.divider()
 
-st.subheader('Total Revenue Less Campaign cost and Ad Spend')
+st.subheader('Campaign Revenue Less Campaign cost and Ad Spend')
 st.header(f":orange[${(charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum() - campaign_cost - ad_spend):.2f}]")
 st.divider()
 
-st.subheader('Profit/Loss per $1 Ad Spent')
+st.subheader('Campaign Profit/Loss per $1 Ad Spent')
 st.header(f":orange[${(((charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum())/ad_spend)-1):.2f}]")
 
 
