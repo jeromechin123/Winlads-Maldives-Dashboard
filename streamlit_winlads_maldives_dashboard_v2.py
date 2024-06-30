@@ -25,10 +25,20 @@ import_collection_name = "stripe1_charges_selected"
 
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 
-def get_data(database_name, import_collection_name):
+if 'key' not in st.session_state:
+    st.session_state['rerun_counter'] = 0
+
+@st.cache(ttl=300) 
+
+def get_data(database_name, import_collection_name, rerun_counter):
     db = client[database_name]
     collection = db[import_collection_name]
     return list(collection.find())
+
+
+df = dbfunction(conn, sql, st.session_state['rerun_counter'])
+
+
 
 # Extract all data from collection 
 
@@ -69,7 +79,7 @@ import_collection_name = "stripe2_charges_selected"
 
 # Extract all data from 2nd collection 
 
-stripe2_charges_data = get_data(database_name, import_collection_name)
+stripe2_charges_data = get_data(database_name, import_collection_name, st.session_state['rerun_counter']))
 
 
 # Flatten data to get json fields in individual columns -- Use '_' as seperator
@@ -120,6 +130,9 @@ st.sidebar.divider()
 
 
 
+if st.button("re-run database"):
+    st.session_state['rerun_counter'] += 1
+       
 # Ask for variable inputs for campaign spending
 campaign_cost = st.sidebar.number_input('Campaign Cost', min_value=0.0,value=10000.0)
 ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=3000.0)
