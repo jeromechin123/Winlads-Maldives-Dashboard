@@ -35,14 +35,9 @@ def get_data(database_name, import_collection_name, rerun_counter):
     collection = db[import_collection_name]
     return list(collection.find())
 
-
-df = dbfunction(conn, sql, st.session_state['rerun_counter'])
-
-
-
 # Extract all data from collection 
 
-chrarges1_data = get_data(database_name, import_collection_name) 
+chrarges1_data = get_data(database_name, import_collection_name, st.session_state['rerun_counter'])
 
 # Flatten data to get json fields in individual columns -- Use '_' as seperator
 
@@ -79,7 +74,7 @@ import_collection_name = "stripe2_charges_selected"
 
 # Extract all data from 2nd collection 
 
-stripe2_charges_data = get_data(database_name, import_collection_name, st.session_state['rerun_counter']))
+stripe2_charges_data = get_data(database_name, import_collection_name, st.session_state['rerun_counter'])
 
 
 # Flatten data to get json fields in individual columns -- Use '_' as seperator
@@ -130,7 +125,7 @@ st.sidebar.divider()
 
 
 
-if st.button("re-run database"):
+if st.sidebar.button("re-run database"):
     st.session_state['rerun_counter'] += 1
        
 # Ask for variable inputs for campaign spending
