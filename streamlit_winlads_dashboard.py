@@ -141,8 +141,10 @@ ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=5690.12)
 
 
 campaign_start_date = pd.to_datetime (st.sidebar.date_input("Campaign Start Date", value = datetime(2024, 6, 9), format = "DD/MM/YYYY"))
-campaign_end_date = pd.to_datetime (st.sidebar.date_input("Campaign End Date", value = datetime(2024, 6, 30), format = "DD/MM/YYYY")) + timedelta(days=1)
+campaign_end_date = pd.to_datetime (st.sidebar.date_input("Campaign End Date", value = datetime(2024, 6, 30), format = "DD/MM/YYYY", min_value= (campaign_start_date))) + timedelta(days=1)
 
+reporting_period_start = pd.to_datetime (st.sidebar.date_input("Reporting Period Start Date", value = datetime(2024, 6, 1), format = "DD/MM/YYYY"))
+reporting_period_end = pd.to_datetime (st.sidebar.date_input("Reporting Period End Date", value = datetime(2024, 6, 30), format = "DD/MM/YYYY", min_value= (reporting_period_start))) + timedelta(days=1)
 
 # Select owners name from exclude list
 
@@ -159,7 +161,7 @@ if st.sidebar.checkbox('Add admin transactions'):
 # filter data based on criteria for stripe1 charges to get purchaser of one-offs
 
 charges1_active_purchasers = charges1_flatten_data[(charges1_flatten_data['created'] >=   campaign_start_date) &
-                                                   (charges1_flatten_data['created'] <=   campaign_end_date ) &
+                                                   (charges1_flatten_data['created'] <=  campaign_end_date ) &
                                                    (charges1_flatten_data['paid'] == True) &
                                                    (~charges1_flatten_data['description'].str.contains('Subscription', na=False)) &
                                                    (~charges1_flatten_data['name'].isin(exclude_name_list))
@@ -215,7 +217,7 @@ col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
 total_one_off_revenue = charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum()
 with col_1:
     
-    st.subheader('Once off Revenue')
+    st.subheader('Total Once-off Revenue')
     st.header(f":orange[${charges1_active_purchasers['amount'].sum() + charges2_active_purchasers['amount'].sum():.2f}]")
 
     st.subheader('Campaign Profit/Loss')
@@ -227,34 +229,41 @@ with col_2:
     st.subheader('Return on Ad Spend')
     st.header(f":orange[{((total_one_off_revenue - ad_spend)/ad_spend*100):.2f}%]")
 
+    st.subheader('Total Once-off Transactions')
+    st.header(f":orange[{(charges1_active_purchasers['id'].count() + charges2_active_purchasers['id'].count())}]")
+
 st.divider()
 
-# filter data based on criteria for active subscribers
+# # filter data based on criteria for active subscribers
+# st.write(subscriptions_flatten_data)                                                
 
 
-active_subscribers = subscriptions_flatten_data[
-                                                (subscriptions_flatten_data['status'].str.contains('active|trialing')) &
-                                                (~subscriptions_flatten_data['name'].isin(exclude_name_list))
-                                                ]
-                                                
+# active_subscribers = subscriptions_flatten_data[
+#                                                 (subscriptions_flatten_data['current_period_start'] <= campaign_end_date) &
+#                                                 (subscriptions_flatten_data['current_period_end'] >= campaign_end_date) &
+#                                                 (subscriptions_flatten_data['created'] <= campaign_end_date) &
+#                                                 (~subscriptions_flatten_data['status'].str.contains('incomplete_expired|past_due')) &
+#                                                 (~subscriptions_flatten_data['name'].isin(exclude_name_list))
+#                                                 ]
+# st.write(active_subscribers)                                                
 
-col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
+# col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
 
-with col_1:
-    st.subheader('Active Subscribers')
-    st.header(f":orange[{active_subscribers['id'].count()}]")
+# with col_1:
+#     st.subheader('Active Subscribers')
+#     st.header(f":orange[{active_subscribers['id'].count()}]")
 
-with col_2:
-    st.subheader('Active Subscribers Revenue')
-    st.header(f":orange[${active_subscribers['monthly_amount'].sum():.2f}]")
+# with col_2:
+#     st.subheader('Active Subscribers Revenue')
+#     st.header(f":orange[${active_subscribers['monthly_amount'].sum():.2f}]")
 
-if st.checkbox('Show Data for Active Subscribers'):
-    st.subheader('Active Subscribers Data')
-    st.write(active_subscribers)
+# if st.checkbox('Show Data for Active Subscribers'):
+#     st.subheader('Active Subscribers Data')
+#     st.write(active_subscribers)
 
 
-charges1_new_subscribers = charges1_flatten_data[(charges1_flatten_data['created'] >=   campaign_start_date) &
-                                                    (charges1_flatten_data['created'] <=   campaign_end_date ) &
+charges1_new_subscribers = charges1_flatten_data[(charges1_flatten_data['created'] >=  campaign_start_date) &
+                                                    (charges1_flatten_data['created'] <=  campaign_end_date ) &
                                                     (charges1_flatten_data['paid'] == True) &
                                                     (charges1_flatten_data['description'].str.contains('Subscription creation', na=False)) &
                                                     (~charges1_flatten_data['name'].isin(exclude_name_list))
@@ -267,12 +276,12 @@ charges1_new_renewals = charges1_flatten_data[(charges1_flatten_data['created'] 
                                                     (~charges1_flatten_data['name'].isin(exclude_name_list))
                                                     ]
 
+total_subscription_revenue_campaign_period = charges1_new_subscribers['amount'].sum() + charges1_new_renewals['amount'].sum()
 
 if st.checkbox('Show info on subscribers movement during campaign period'):
 
     # filter data based on criteria for new subscribers
 
-    st.divider()
 
 
     col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
@@ -306,26 +315,89 @@ if st.checkbox('Show info on subscribers movement during campaign period'):
         st.subheader('Renewals Data')
         st.write(charges1_new_renewals )
     
+    st.subheader('Total Subscription Revenue for Campaign Period')
+    st.header(f":orange[${total_subscription_revenue_campaign_period:.2f}]")
+    
+# Subsription information for reporting period only
 
 st.divider()
 
+new_subscribers_reporting_period = charges1_flatten_data[(charges1_flatten_data['created'] >=  reporting_period_start) &
+                                                    (charges1_flatten_data['created'] <=   reporting_period_end ) &
+                                                    (charges1_flatten_data['paid'] == True) &
+                                                    (charges1_flatten_data['description'].str.contains('Subscription creation', na=False)) &
+                                                    (~charges1_flatten_data['name'].isin(exclude_name_list))
+                                                    ]
 
-st.subheader('Total Monthly Revenue')
+subscriber_renewals_reporting_period = charges1_flatten_data[(charges1_flatten_data['created'] >=   reporting_period_start) &
+                                                    (charges1_flatten_data['created'] <=   reporting_period_end ) &
+                                                    (charges1_flatten_data['paid'] == True) &
+                                                    (charges1_flatten_data['description'].str.contains('Subscription update', na=False)) &
+                                                    (~charges1_flatten_data['name'].isin(exclude_name_list))
+                                                    ]
+
+
+col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
+
+with col_1:
+    st.subheader('New Subscribers for Reporting Period')
+    st.header(f":orange[{new_subscribers_reporting_period['id'].count()}]")
+
+with col_2:
+    st.subheader('New Subscribers Revenue for Reporting Period')
+    st.header(f":orange[${new_subscribers_reporting_period['amount'].sum():.2f}]")
+
+if st.checkbox('Show Data for New Subscribers during Reporting Period'):
+    st.subheader('New Subscribers Data')
+    st.write(new_subscribers_reporting_period)
+
+# filter data based on criteria for renewing subscribers
+
+
+col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")
+
+with col_1:
+    st.subheader('Subscription Renewal for Reporting Period')
+    st.header(f":orange[{subscriber_renewals_reporting_period['id'].count()}]")
+
+with col_2:
+    st.subheader('Renewal Revenue for Reporting Period')
+    st.header(f":orange[${subscriber_renewals_reporting_period['amount'].sum():.2f}]")
+
+if st.checkbox('Show Data for Renewals during Reporting Period'):
+    st.subheader('Renewals Data')
+    st.write(subscriber_renewals_reporting_period )
+st.divider()
+
+# Total Subscription revenue and  once off revenue
+
+total_subscription_revenue_reporting_period = subscriber_renewals_reporting_period['amount'].sum() + new_subscribers_reporting_period['amount'].sum()
+
+col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")  
+
+with col_1:
+    st.subheader('Total Subscription Revenue for Reporting Period')
+    st.header(f":orange[${total_subscription_revenue_reporting_period:.2f}]")        
+
+with col_2:
+    st.subheader('Total Revenue for Once-offs for Reporting Period')
+    st.header(f":orange[${(total_one_off_revenue):.2f}]")
+
+st.divider()
+
+st.subheader('Total Revenue for Reporting Period')
 
 revenue = (charges1_active_purchasers['amount'].sum() + 
            charges2_active_purchasers['amount'].sum() + 
-           charges1_new_renewals['amount'].sum())
+           subscriber_renewals_reporting_period['amount'].sum() +
+           new_subscribers_reporting_period['amount'].sum())
 
 st.header(f":orange[${(revenue):.2f}]")
 
-st.divider()
 
-st.subheader('Total Monthly Profit/Loss')
+st.subheader('Total Profit/Loss for Reporting Period')
 
-profit = (charges1_active_purchasers['amount'].sum() + 
-           charges2_active_purchasers['amount'].sum() + 
-           charges1_new_renewals['amount'].sum() -
-           campaign_cost - ad_spend)
+profit = (revenue - campaign_cost - ad_spend)
 
 st.header(f":red[${(profit):.2f}]")
 
