@@ -262,6 +262,8 @@ st.divider()
 #     st.write(active_subscribers)
 
 
+# Subscriber information for campaign period only
+
 charges1_new_subscribers = charges1_flatten_data[(charges1_flatten_data['created'] >=  campaign_start_date) &
                                                     (charges1_flatten_data['created'] <=  campaign_end_date ) &
                                                     (charges1_flatten_data['paid'] == True) &
@@ -318,9 +320,10 @@ if st.checkbox('Show info on subscribers movement during campaign period'):
     st.subheader('Total Subscription Revenue for Campaign Period')
     st.header(f":orange[${total_subscription_revenue_campaign_period:.2f}]")
     
-# Subsription information for reporting period only
 
 st.divider()
+
+# Subsription information for reporting period only
 
 new_subscribers_reporting_period = charges1_flatten_data[(charges1_flatten_data['created'] >=  reporting_period_start) &
                                                     (charges1_flatten_data['created'] <=   reporting_period_end ) &
@@ -402,6 +405,8 @@ profit = (revenue - campaign_cost - ad_spend)
 st.header(f":red[${(profit):.2f}]")
 
 st.divider()
+
+# Bar chart for one-off revenue over campaign period
 
 st.subheader('One-off Revenue over Campaign Period')
 oneoffrevenuechart = pd.concat([charges1_active_purchasers[['created', 'amount']], charges2_active_purchasers[['created', 'amount']]])
