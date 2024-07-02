@@ -122,7 +122,7 @@ subscriptions_flatten_data.drop(columns = ['_id'],axis = 1 , inplace=True)
 # 
 
 
-st.title('Winlads Maldives Campaign')
+st.title('Winlads Campaign Dashboard')
 st.divider()
 
 
@@ -134,8 +134,10 @@ st.sidebar.divider()
 
 
 # Ask for variable inputs for campaign spending
+
+subscriber_rewards = st.sidebar.number_input('Subscriber Rewards', min_value=0.0,value=3000.0)
 campaign_cost = st.sidebar.number_input('Giveaway Prize Cost', min_value=0.0,value=9499.0)
-ad_spend = st.sidebar.number_input('Ad spend', min_value=0.0,value=5690.12)
+ad_spend = st.sidebar.number_input('Ad spend for Campaign', min_value=0.0,value=5690.12)
 
 # Get campaign start date and end date
 
@@ -372,8 +374,25 @@ if st.checkbox('Show Data for Renewals during Reporting Period'):
     st.write(subscriber_renewals_reporting_period )
 st.divider()
 
-# Total Subscription revenue and  once off revenue
+# Total Subscription revenue and once off revenue for reporting period
 
+once_off_revenue_reporting_period = (
+                                    charges1_flatten_data[(charges1_flatten_data['created'] >=   reporting_period_start) &
+                                                   (charges1_flatten_data['created'] <=  reporting_period_end ) &
+                                                   (charges1_flatten_data['paid'] == True) &
+                                                   (~charges1_flatten_data['description'].str.contains('Subscription', na=False)) &
+                                                   (~charges1_flatten_data['name'].isin(exclude_name_list))
+                                                    ]['amount'].sum() 
+                                    +
+                                    charges2_flatten_data[(charges2_flatten_data['created'] >=   reporting_period_start) &
+                                                    (charges2_flatten_data['created'] <=  reporting_period_end) &
+                                                    (charges2_flatten_data['paid'] == True) &
+                                                    (~charges2_flatten_data['name'].isin(exclude_name_list))
+                                                    ]['amount'].sum()   
+                                    )
+                                    
+
+                                    
 total_subscription_revenue_reporting_period = subscriber_renewals_reporting_period['amount'].sum() + new_subscribers_reporting_period['amount'].sum()
 
 col_1, col_2 =st.columns(2, gap="small", vertical_alignment="top")  
@@ -384,7 +403,7 @@ with col_1:
 
 with col_2:
     st.subheader('Total Revenue for Once-offs for Reporting Period')
-    st.header(f":orange[${(total_one_off_revenue):.2f}]")
+    st.header(f":orange[${(once_off_revenue_reporting_period):.2f}]")
 
 st.divider()
 
@@ -397,10 +416,15 @@ revenue = (charges1_active_purchasers['amount'].sum() +
 
 st.header(f":orange[${(revenue):.2f}]")
 
+st.subheader('Total Cost for Reporting Period')
+
+cost = (campaign_cost + ad_spend + subscriber_rewards)
+
+st.header(f":orange[${(cost):.2f}]")
 
 st.subheader('Total Profit/Loss for Reporting Period')
 
-profit = (revenue - campaign_cost - ad_spend)
+profit = (revenue - campaign_cost - ad_spend - subscriber_rewards)
 
 st.header(f":red[${(profit):.2f}]")
 
